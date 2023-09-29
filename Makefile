@@ -1,6 +1,6 @@
 LOCAL_BIN = $(CURDIR)/bin
 GOLINT_VER = 1.53.3
-APP_NAME = auth
+APP_NAME = chat-server
 # APP_BIN_DIR = $(LOCAL_BIN)/$(app)
 SOURCE_DIR = $(CURDIR)/cmd
 GO_CMP_ARGS = CGO_ENABLED=0 GOEXPERIMENT="loopvar"
