@@ -15,75 +15,68 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// ChatHandlerV1 is a struct that implements Chat_V1Server interface
-type ChatHandlerV1 struct {
+// ChatRPCServerV1 is a struct that implements Chat_V1Server interface
+type ChatRPCServerV1 struct {
 	desc.UnimplementedChat_V1Server
 	log *log.Logger
 }
 
-// NewChatHandlerV1 returns a new ChatHandlerV1 instance
-func NewChatHandlerV1(log *log.Logger) *ChatHandlerV1 {
-	return &ChatHandlerV1{
+// NewChatRPCServerV1 returns a new ChatRPCServerV1 instance
+func NewChatRPCServerV1(log *log.Logger) *ChatRPCServerV1 {
+	return &ChatRPCServerV1{
 		log: log,
 	}
 }
 
 // Create is a method that implements the Create method of the Chat_V1Server interface
-func (h *ChatHandlerV1) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
-	if dline, ok := ctx.Deadline(); ok {
-		h.log.Println(color.BlueString("Deadline: %v", dline))
-	}
-
+func (s *ChatRPCServerV1) Create(ctx context.Context, req *desc.CreateRequest) (*desc.CreateResponse, error) {
 	buf := strings.Builder{}
 	buf.WriteString("Received Create:\n")
 
 	for i, user := range req.Usernames {
-		usrStr := fmt.Sprintf("\t#%d Username: %s\n", i, user)
-		buf.WriteString(usrStr)
+		buf.WriteString(fmt.Sprintf("\t#%d Username: %s\n", i, user))
 	}
 
-	h.log.Println(color.BlueString(buf.String()))
+	s.log.Println(color.BlueString(buf.String()))
+
+	if dline, ok := ctx.Deadline(); ok {
+		s.log.Println(color.BlueString("Deadline: %v", dline))
+	}
 
 	randInt64, err := rand.Int(rand.Reader, new(big.Int).SetInt64(1<<63-1))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
-	id := randInt64.Int64()
 
-	respStr := fmt.Sprintf("Response Create:\n\tID: %v\n", id)
-
-	h.log.Println(color.GreenString(respStr))
+	s.log.Println(color.GreenString(fmt.Sprintf("Response Create:\n\tID: %v\n", randInt64.Int64())))
 
 	return &desc.CreateResponse{
-		Id: id,
+		Id: randInt64.Int64(),
 	}, nil
 }
 
 // Delete is a method that implements the Delete method of the Chat_V1Server interface
-func (h *ChatHandlerV1) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
-
-	id := req.Id
+func (s *ChatRPCServerV1) Delete(ctx context.Context, req *desc.DeleteRequest) (*emptypb.Empty, error) {
+	s.log.Println(color.BlueString("Received Delete:\n\tID: %v", req.GetId()))
 
 	if dline, ok := ctx.Deadline(); ok {
-		h.log.Println(color.BlueString("Deadline: %v", dline))
+		s.log.Println(color.BlueString("Deadline: %v", dline))
 	}
-
-	h.log.Println(color.BlueString("Received Delete:\n\tID: %v", id))
 
 	return &emptypb.Empty{}, nil
 }
 
 // SendMessage is a method that implements the SendMessage method of the Chat_V1Server interface
-func (h *ChatHandlerV1) SendMessage(ctx context.Context, req *desc.SendRequest) (*emptypb.Empty, error) {
-	from := req.From
-	text := req.Text
-	when := req.Timestamp
+func (s *ChatRPCServerV1) SendMessage(ctx context.Context, req *desc.SendRequest) (*emptypb.Empty, error) {
+	s.log.Println(color.BlueString("Received SendMessage:\n\tFrom: %v\n\tText: %v\n\tTimestamp: %v",
+		req.GetFrom(),
+		req.GetText(),
+		req.GetTimestamp(),
+	))
 
 	if dline, ok := ctx.Deadline(); ok {
-		h.log.Println(color.BlueString("Deadline: %v", dline))
+		s.log.Println(color.BlueString("Deadline: %v", dline))
 	}
-
-	h.log.Println(color.BlueString("Received SendMessage:\n\tFrom: %v\n\tText: %v\n\tTimestamp: %v", from, text, when))
 
 	return &emptypb.Empty{}, nil
 }

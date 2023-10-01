@@ -33,9 +33,9 @@ func main() {
 	s := grpc.NewServer()
 	reflection.Register(s)
 
-	h := handler.NewChatHandlerV1(iLog)
+	rpcSrvV1 := handler.NewChatRPCServerV1(iLog)
 
-	chat_v1.RegisterChat_V1Server(s, h)
+	chat_v1.RegisterChat_V1Server(s, rpcSrvV1)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
