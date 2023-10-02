@@ -1,4 +1,4 @@
-name: Auth
+name: Chat-Server
 
 on:
   push:
